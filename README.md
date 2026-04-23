@@ -78,42 +78,44 @@ User (CLI Commands) -> engine.c (User-space runtime + Supervisor) -> Kernel Modu
 ### 5.1 Multi-container Supervision
 Two or more containers running simultaneously.
 
-![multi-container](images/1.png)
+![multi-container](boilerplate/images/1.png)
 
 ### 5.2 Metadata Tracking
 Listing running containers and their PIDs.
 
-![metadata](images/2.png)
+![metadata](boilerplate/images/2.png)
 
 ### 5.3 Logging System
 Container lifecycle events recorded in log file.
 
-![logging](images/3.png)
+![logging](boilerplate/images/4.png)
 
 ### 5.4 CLI and Kernel IPC
 User-space communicates with kernel module via ioctl.
 
-![ipc](images/4.png)
+![ipc](boilerplate/images/6.png)
 
 ### 5.5 Soft Limit Warning
 Warning generated when memory usage exceeds soft threshold.
 
-![soft-limit](images/5.png)
+![soft-limit](boilerplate/images/8.png)
 
 ### 5.6 Hard Limit Enforcement
 Container terminated when memory exceeds hard limit.
 
-![hard-limit](images/6.png)
+![hard-limit](boilerplate/images/9.png)
 
 ### 5.7 Scheduling Experiment
 Comparison of CPU, memory, and I/O workloads.
 
-![scheduling](images/7.png)
+![scheduling](boilerplate/images/11.png)
+![scheduling](boilerplate/images/12.png)
 
 ### 5.8 Clean Teardown
 Containers stopped without leaving zombie processes.
 
-![teardown](images/8.png)
+![teardown](boilerplate/images/13.png)
+![teardown](boilerplate/images/14.png)
 
 ---
 
