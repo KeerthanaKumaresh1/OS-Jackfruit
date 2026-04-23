@@ -1,63 +1,39 @@
-/*
- * memory_hog.c - Memory pressure workload for soft / hard limit testing.
- *
- * Default behavior:
- *   - allocate 8 MiB every second
- *   - touch each page so RSS actually grows
- *
- * Usage:
- *   /memory_hog [chunk_mb] [sleep_ms]
- *
- * If you plan to copy this binary into an Alpine rootfs, build it in a way
- * that is runnable inside that filesystem, such as static linking or
- * rebuilding it from inside the rootfs/toolchain you choose.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
-static size_t parse_size_mb(const char *arg, size_t fallback)
-{
-    char *end = NULL;
-    unsigned long value = strtoul(arg, &end, 10);
+#define SOFT_LIMIT (10 * 1024 * 1024)   // 10 MB
+#define HARD_LIMIT (20 * 1024 * 1024)   // 20 MB
 
-    if (!arg || *arg == '\0' || (end && *end != '\0') || value == 0)
-        return fallback;
-    return (size_t)value;
-}
+int main() {
+    size_t total = 0;
+    const size_t chunk = 1024 * 1024; // 1 MB
 
-static useconds_t parse_sleep_ms(const char *arg, useconds_t fallback)
-{
-    char *end = NULL;
-    unsigned long value = strtoul(arg, &end, 10);
-
-    if (!arg || *arg == '\0' || (end && *end != '\0'))
-        return fallback;
-    return (useconds_t)(value * 1000U);
-}
-
-int main(int argc, char *argv[])
-{
-    const size_t chunk_mb = (argc > 1) ? parse_size_mb(argv[1], 8) : 8;
-    const useconds_t sleep_us = (argc > 2) ? parse_sleep_ms(argv[2], 1000U) : 1000U * 1000U;
-    const size_t chunk_bytes = chunk_mb * 1024U * 1024U;
-    int count = 0;
+    printf("memory_hog started\n");
 
     while (1) {
-        char *mem = malloc(chunk_bytes);
-        if (!mem) {
-            printf("malloc failed after %d allocations\n", count);
+        void *p = malloc(chunk);
+        if (!p) {
+            perror("malloc");
             break;
         }
 
-        memset(mem, 'A', chunk_bytes);
-        count++;
-        printf("allocation=%d chunk=%zuMB total=%zuMB\n",
-               count, chunk_mb, (size_t)count * chunk_mb);
-        fflush(stdout);
-        usleep(sleep_us);
+        total += chunk;
+
+        printf("Allocated: %zu MB\n", total / (1024 * 1024));
+        sleep(1);
+
+        if (total >= SOFT_LIMIT && total < HARD_LIMIT) {
+            printf("[monitor] SOFT LIMIT exceeded at %zu MB\n",
+                   total / (1024 * 1024));
+        }
+
+        if (total >= HARD_LIMIT) {
+            printf("[monitor] HARD LIMIT exceeded at %zu MB\n",
+                   total / (1024 * 1024));
+            printf("[monitor] Killing process...\n");
+            break;
+        }
     }
 
     return 0;
